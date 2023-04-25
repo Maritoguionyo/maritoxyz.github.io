@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mario Kart Wii Count</title>
+	<script src="md5.min.js"></script> <!-- https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js -->
+
+
+    <script>
+
+
+
+	function hexToBytes(hex) {
+		const bytes = new Uint8Array(hex.length / 2);
+		for (let i = 0; i < hex.length; i += 2) {
+			bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+		}
+	return bytes;
+	}
+
+
+
+	function pidToFc(profile_id, game_id = 'RMCJ') {
+	
+		if (profile_id === undefined || profile_id === null || profile_id === 0) {
+			return "Loading...";
+		}
+		const reversedGameId = game_id.split('').reverse().join('');
+		const buffer = [];
+		//how to do it yourself!: https://wiki.tockdom.com/wiki/Friend_Code
+		buffer[0] = profile_id & 0xff;
+		buffer[1] = (profile_id >> 8) & 0xff;
+		buffer[2] = (profile_id >> 16) & 0xff;
+		buffer[3] = (profile_id >> 24) & 0xff;
+		buffer[4] = reversedGameId.charCodeAt(0);
+		buffer[5] = reversedGameId.charCodeAt(1);
+		buffer[6] = reversedGameId.charCodeAt(2);
+		buffer[7] = reversedGameId.charCodeAt(3);
+
+		const binaryString = buffer.map(byte => String.fromCharCode(byte)).join('');
+		const md5HexString = md5(binaryString);
+		const md5Hash = hexToBytes(md5HexString);
+
+
+		// Calculate the checksum using a custom right shift operation
+		const csum = BigInt(Math.floor(md5Hash[0] / 2)) & 0x7fn;
+
+		// Calculate the friend code using BigInt
+		const friendCode = (csum << 32n) | BigInt(profile_id);
+		const friendCodeString = String(friendCode).padStart(12, '0');
+  
+		const formattedFriendCode = friendCodeString.slice(0, 4) + '-' + friendCodeString.slice(4, 8) + '-' + friendCodeString.slice(8, 12);
+  
+		return formattedFriendCode;
+	}
+
+	
+	function updateStats() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "http://newwfc.xyz/json", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          var count = data.mariokartwii.length;
+          var items = data.mariokartwii;
+          var html = "<b>auto refresh every 10 seconds</b> <br></br> <b>There is/are " + count + " player/s connected on Mario Kart Wii: <br></b>";
+          for (var i = 0; i < count; i++) {
+            
+            if(items[i].rk === "bt"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: WorldWide Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_0"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Japan Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_1"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: NA Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_2"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: European Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_3"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: AU & NZ Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_4"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Taiwan Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_5"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: South Korea Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_6"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: China Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            
+            else if(items[i].rk === "vs"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: WorldWide Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") (" + items[i].dwc_groupid + ")<br><br>";
+            }
+            else if(items[i].rk === "vs_0"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Japan Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_1"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: NA Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_2"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: European Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_3"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: AU & NZ Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_4"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Taiwan Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_5"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: South Korea Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_6"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: China Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+			else if(items[i].rk === "vs_22"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: CTGP-R 1.03.1044 VS (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+			else if(items[i].rk === "cd_22"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: CTGP-R 1.03.1044 Countdown (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Unknown Region: " + items[i].rk + " (VR: " + items[i].ev + ") (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            
+            }else{
+              if(items[i].dwc_mtype === "0"){
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Player is not in a match? (Looking for a matchmaking game) <br><br>";
+              }else if(items[i].dwc_mtype === "2"){
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Hosting a Friend Room (" + items[i].dwc_groupid + ")<br><br>";
+              }else if(items[i].dwc_mtype === "3"){
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: In a Friend Room (" + items[i].dwc_groupid + ")<br><br>";
+              }else{
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Player is not in a match<br><br>";
+              }
+            }
+          }
+          document.getElementById("result").innerHTML = html;
+        }
+      };
+      xhr.send();
+	}
+	updateStats();
+	
+	setInterval(updateStats, 10000);
+    </script>
+    <style>
+      body {
+        background-color: #424549;
+        color: white;
+        text-align: left;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="result"></div>
+  </body>
+</html>

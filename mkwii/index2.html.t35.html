@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mario Kart Wii Count</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/md5.min.js"></script>
+
+
+
+    <script>
+
+function pidToFc(pid) {
+  const buffer = new Uint8Array(8);
+  buffer[0] = pid & 0xff;
+  buffer[1] = (pid >> 8) & 0xff;
+  buffer[2] = (pid >> 16) & 0xff;
+  buffer[3] = (pid >> 24) & 0xff;
+  buffer[4] = 'J'.charCodeAt(0);
+  buffer[5] = 'C'.charCodeAt(0);
+  buffer[6] = 'M'.charCodeAt(0);
+  buffer[7] = 'R'.charCodeAt(0);
+
+  const md5 = CryptoJS.MD5(buffer);
+        const csum = (md5.words[0] >> 1) & 0x7f;
+		console.log(csum)
+        const fc = (csum << 32) | pid;
+		console.log(fc)
+
+  return fc;
+}
+
+
+
+
+
+
+
+
+
+	
+	function updateStats() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "http://newwfc.xyz/json", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          var count = data.mariokartwii.length;
+          var items = data.mariokartwii;
+          var html = "<b>auto refresh every 10 seconds</b> <br></br> <b>There is/are " + count + " player/s connected on Mario Kart Wii: <br></b>";
+          for (var i = 0; i < count; i++) {
+            
+            if(items[i].rk === "bt"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: WorldWide Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_0"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Japan Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_1"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: NA Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_2"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: European Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_3"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: AU & NZ Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_4"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Taiwan Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_5"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: South Korea Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "bt_6"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: China Regional Battles (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            
+            else if(items[i].rk === "vs"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: WorldWide Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") (" + items[i].dwc_groupid + ")<br><br>";
+            }
+            else if(items[i].rk === "vs_0"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Japan Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_1"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: NA Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_2"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: European Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_3"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: AU & NZ Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_4"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Taiwan Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_5"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: South Korea Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk === "vs_6"){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: China Regional Versus (VR: " + items[i].ev + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            }
+            else if(items[i].rk){
+              html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Unknown Region: " + items[i].rk + " (VR: " + items[i].ev + ") (BR: " + items[i].eb + ") (Opponents: " + items[i].numplayers + ") <br><br>";
+            
+            }else{
+              if(items[i].dwc_mtype === "0"){
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Player is not in a match? (Looking for a matchmaking game) <br><br>";
+              }else if(items[i].dwc_mtype === "2"){
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Hosting a Friend Room (" + items[i].dwc_groupid + ")<br><br>";
+              }else if(items[i].dwc_mtype === "3"){
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: In a Friend Room (" + items[i].dwc_groupid + ")<br><br>";
+              }else{
+                html += "<b>" + pidToFc(items[i].dwc_pid) + "</b>: Player is not in a match<br><br>";
+              }
+            }
+          }
+          document.getElementById("result").innerHTML = html;
+        }
+      };
+      xhr.send();
+	}
+	updateStats();
+	
+	setInterval(updateStats, 10000);
+    </script>
+    <style>
+      body {
+        background-color: #424549;
+        color: white;
+        text-align: left;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="result"></div>
+  </body>
+</html>
